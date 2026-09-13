@@ -1,6 +1,7 @@
 /**
- * CyberToolkit dashboard interactions (Part 2).
- * No cybersecurity algorithms, API keys, or passwords belong here.
+ * CyberToolkit dashboard interactions (Part 3).
+ * Talks to Flask with fetch(). No cybersecurity algorithms, API keys,
+ * or passwords belong here.
  */
 (function () {
   "use strict";
@@ -9,17 +10,17 @@
     password: {
       title: "Password Analyzer",
       body:
-        "This workspace will later send a password to Flask, which will call the Python Password Analyzer. Strength is not calculated in JavaScript.",
+        "This workspace will later POST a password to /api/password/analyze. Flask validates the JSON and calls the Python Password Analyzer. Strength is not calculated in JavaScript.",
     },
     hash: {
       title: "Hash Calculator",
       body:
-        "This workspace will later ask the Python Hash Calculator for SHA-256, SHA-512, or educational MD5. Hashing is not done in the browser.",
+        "This workspace will later ask Flask to call the Python Hash Calculator for SHA-256, SHA-512, or educational MD5. Hashing is not done in the browser.",
     },
     integrity: {
       title: "File Integrity Checker",
       body:
-        "This workspace will later compare file SHA-256 hashes through the Python module. The dashboard does not read your files by itself yet.",
+        "This workspace will later compare file SHA-256 hashes through Flask and the Python module. The dashboard does not read your files by itself yet.",
     },
     ip: {
       title: "IP Information",
@@ -61,6 +62,37 @@
     }
   }
 
+  function setBackendStatus(text, state) {
+    var el = document.getElementById("backend-status");
+    if (!el) {
+      return;
+    }
+    el.textContent = text;
+    el.classList.remove("is-online", "is-offline");
+    if (state) {
+      el.classList.add(state);
+    }
+  }
+
+  function loadBackendStatus() {
+    setBackendStatus("Checking backend…", "");
+    fetch("/api/status")
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("bad status");
+        }
+        return response.json();
+      })
+      .then(function (data) {
+        var name = data.application || "CyberToolkit";
+        var status = data.status || "unknown";
+        setBackendStatus(name + " backend is " + status + ".", "is-online");
+      })
+      .catch(function () {
+        setBackendStatus("Backend is not reachable.", "is-offline");
+      });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     var explore = document.getElementById("explore-tools");
     if (explore) {
@@ -79,5 +111,12 @@
     if (closeButton) {
       closeButton.addEventListener("click", closeTool);
     }
+
+    var checkBackend = document.getElementById("check-backend");
+    if (checkBackend) {
+      checkBackend.addEventListener("click", loadBackendStatus);
+    }
+
+    loadBackendStatus();
   });
 })();

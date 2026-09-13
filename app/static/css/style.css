@@ -136,10 +136,31 @@ body {
 }
 
 .lede {
-  margin: 16px auto 28px;
+  margin: 16px auto 16px;
   max-width: 40rem;
   color: var(--muted);
   font-size: 1.05rem;
+}
+
+.backend-status {
+  margin: 0 auto 24px;
+  max-width: 28rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.backend-status.is-online {
+  background: #e6f4ea;
+  color: #1e5a32;
+}
+
+.backend-status.is-offline {
+  background: #fdecea;
+  color: #8a1f11;
 }
 
 .btn {

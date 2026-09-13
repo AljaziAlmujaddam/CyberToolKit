@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for the Version 2 Flask dashboard."""
+"""Tests for the Version 2 Flask dashboard and first API endpoints."""
 
 from __future__ import annotations
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -30,6 +31,8 @@ class WebHomepageTests(unittest.TestCase):
         self.assertIn("IP Information", body)
         self.assertIn("Log Analyzer", body)
         self.assertIn("Explore Tools", body)
+        self.assertIn("Check backend", body)
+        self.assertIn("backend-status", body)
         self.assertIn('href="#home"', body)
         self.assertIn('href="#tools"', body)
         self.assertIn('href="#about"', body)
@@ -50,8 +53,84 @@ class WebHomepageTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"data-tool", response.data)
         self.assertIn(b"explore-tools", response.data)
+        self.assertIn(b'fetch("/api/status")', response.data)
         self.assertNotIn(b"eval(", response.data)
         self.assertNotIn(b"IPWHO_API_KEY", response.data)
+
+
+class ApiStatusTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.client = create_app().test_client()
+
+    def test_status_returns_json(self) -> None:
+        response = self.client.get("/api/status")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.is_json)
+        payload = response.get_json()
+        self.assertEqual(payload["status"], "online")
+        self.assertEqual(payload["application"], "CyberToolkit")
+        self.assertNotIn("FLASK_SECRET_KEY", payload)
+        self.assertNotIn("password", payload)
+
+    def test_unknown_api_endpoint_is_json_404(self) -> None:
+        response = self.client.get("/api/does-not-exist")
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(response.is_json)
+        self.assertEqual(response.get_json()["error"], "Not found.")
+
+    def test_wrong_method_on_status_is_json_405(self) -> None:
+        response = self.client.post("/api/status")
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(response.is_json)
+        self.assertEqual(response.get_json()["error"], "Method not allowed.")
+
+
+class PasswordApiValidationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.client = create_app().test_client()
+
+    def test_analyze_valid_password(self) -> None:
+        response = self.client.post(
+            "/api/password/analyze",
+            data=json.dumps({"password": "ExamplePassword123!"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertEqual(payload["strength"], "Strong")
+        self.assertGreaterEqual(payload["length"], 12)
+        self.assertNotIn("password", payload)
+        self.assertNotIn("ExamplePassword123!", response.get_data(as_text=True))
+
+    def test_missing_password_field(self) -> None:
+        response = self.client.post(
+            "/api/password/analyze",
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json()["error"], "Missing field: password.")
+
+    def test_invalid_json(self) -> None:
+        response = self.client.post(
+            "/api/password/analyze",
+            data="{not-json",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.get_json())
+
+    def test_password_must_be_string(self) -> None:
+        response = self.client.post(
+            "/api/password/analyze",
+            data=json.dumps({"password": 12345}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json()["error"],
+            "Field 'password' must be a string.",
+        )
 
 
 class Version1PreservedTests(unittest.TestCase):

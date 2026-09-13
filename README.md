@@ -79,7 +79,7 @@ CyberToolkit/
 | Path | Role |
 | --- | --- |
 | `src/` | Version 1. `cybertool.py` and the security modules. **Do not delete.** |
-| `app/` | Version 2 Flask app. Dashboard UI in Part 2; tool APIs later. |
+| `app/` | Version 2 Flask app. Dashboard UI plus JSON APIs (`/api/status`, first tool route). |
 | `app/modules/` | Imports V1 functions so the web app can call them later. |
 | `data/` | Created/updated at runtime (integrity JSON, IP reports). Not for secrets. |
 | `logs/` | Sample log plus any logs you choose to analyze. |
@@ -135,9 +135,9 @@ Enter `1`–`5` to open a tool. Use **Back** inside a tool, then Enter, to retur
 
 You can still run a module directly while learning, for example `python3 src/hash_calculator.py`.
 
-### Version 2 — local web dashboard (Part 2)
+### Version 2 — local web dashboard (Part 3)
 
-The homepage is a full dashboard: header, Home / Tools / About navigation, a hero section, five tool cards, and an About section. **Open Tool** shows a workspace message only. Analysis still happens in Version 1 Python modules in a later part — not in JavaScript.
+The homepage is a full dashboard: header, Home / Tools / About navigation, a hero section, five tool cards, and an About section. JavaScript uses `fetch()` to call Flask. **Open Tool** still shows a workspace message; the remaining tool forms come later.
 
 ```bash
 source .venv/bin/activate
@@ -146,9 +146,23 @@ python3 run.py
 
 Then open [http://127.0.0.1:5000/](http://127.0.0.1:5000/) on the same computer. The server binds to localhost only.
 
-```text
-Browser  →  Flask (GET /)  →  dashboard HTML + CSS + JS  →  Browser
+Check the API in the browser or with curl:
+
+```bash
+curl http://127.0.0.1:5000/api/status
 ```
+
+```text
+Browser  →  HTML / CSS / JS  →  HTTP  →  Flask  →  Python modules  →  JSON  →  Dashboard
+```
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/` | Dashboard |
+| GET | `/api/status` | JSON health check (`status`, `application`) |
+| POST | `/api/password/analyze` | JSON `{"password": "..."}` → Version 1 analysis (password is not stored or echoed) |
+
+Invalid API paths return JSON `404`. Wrong methods return JSON `405`. Missing or invalid JSON on POST returns JSON `400`. Hash, integrity, IP, and log APIs are not wired yet.
 
 ## Modules
 
@@ -231,7 +245,7 @@ python3 tests/test_web_app.py
 | IP Information Tool | Valid/invalid IPs, types, mocked API errors, report save; private IPs not sent to the API |
 | Log Analyzer | Sample log, empty log, missing file, failed-login threshold, IP counts, case-insensitive search |
 | Main menu | All five tools are dispatched; `abc` and `9` rejected; Exit message |
-| Version 2 homepage | Flask starts; HTML lists tools; CSS and JS are served; V1 helpers still import |
+| Version 2 homepage and API | Flask starts; HTML lists tools; CSS and JS are served; `/api/status` JSON; password POST validation; V1 helpers still import |
 
 Error handling includes empty input, missing files, directories, timeouts (IP tool), and permission errors where applicable.
 
@@ -252,7 +266,7 @@ This project was built to practice:
 
 Not implemented yet:
 
-- Wire each dashboard button to Flask routes that call the V1 modules
+- Wire each remaining dashboard button to Flask routes that call the V1 modules (hash, integrity, IP, log)
 - Common-password / breach checks (still never store the password)
 - Real-time log monitoring and alerts
 - Signed or protected integrity baselines

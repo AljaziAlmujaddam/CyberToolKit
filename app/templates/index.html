@@ -37,9 +37,15 @@
           A Python-based cybersecurity learning toolkit for analyzing passwords,
           hashes, files, IP addresses, and security logs — on your own computer.
         </p>
+        <p class="backend-status" id="backend-status" role="status">
+          Checking backend…
+        </p>
         <p>
           <button type="button" class="btn btn-primary" id="explore-tools">
             Explore Tools
+          </button>
+          <button type="button" class="btn btn-secondary" id="check-backend">
+            Check backend
           </button>
         </p>
       </section>
@@ -48,8 +54,8 @@
         <div class="section-heading">
           <h2>Security Tools</h2>
           <p>
-            Open a tool to see its workspace. Analysis still happens in Python
-            in a later part — this page is the dashboard only.
+            Open a tool to see its workspace. The dashboard talks to Flask over
+            HTTP. Full tool forms will use that same API in a later part.
           </p>
         </div>
 
@@ -152,8 +158,9 @@
           <article>
             <h3>Backend</h3>
             <p>
-              Flask and the Version 1 Python modules will run the real checks.
-              Later parts connect Open Tool to those modules over HTTP.
+              Flask serves this page and JSON APIs such as
+              <code>/api/status</code>. Version 1 Python modules stay separate
+              and are called from routes, not from the browser.
             </p>
           </article>
           <article>
