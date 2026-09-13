@@ -1,6 +1,9 @@
 # CyberToolkit
 
-A Python command-line toolkit for **learning defensive cybersecurity**. One program opens a menu. Each menu item is a small, local utility: passwords, hashing, file integrity, IP information, and log analysis.
+A Python toolkit for **learning defensive cybersecurity**.
+
+- **Version 1** is a terminal menu (`src/cybertool.py`).
+- **Version 2** is a local Flask web app (`run.py`) that will reuse the same Python modules from a browser.
 
 **Purpose:** education and authorized practice on your own machine. This is not a production security product and does not replace professional tools.
 
@@ -19,7 +22,7 @@ All tools run locally except the IP Information Tool, which may send a **public*
 
 ## Features
 
-1. **Password Analyzer** — Accepts a password without echoing it and reports its **length**. The password is not stored or sent anywhere. (Character-class scoring is not implemented yet.)
+1. **Password Analyzer** — Accepts a password without echoing it and reports **length**, character classes (upper, lower, digit, special), and a simple **strength** label. The password is not stored or sent anywhere.
 2. **Hash Calculator** — Hashes text or files with SHA-256, SHA-512, or educational MD5, and compares two hashes.
 3. **File Integrity Checker** — Stores a SHA-256 baseline for local files and later reports unchanged, modified, or missing.
 4. **IP Information Tool** — Validates IPv4/IPv6, classifies public/private/loopback/reserved, optional reverse DNS, and geo/ISP lookup for public IPs.
@@ -29,44 +32,59 @@ All tools run locally except the IP Information Tool, which may send a **public*
 
 | Technology | How it is used |
 | --- | --- |
-| Python 3 | Entire toolkit (standard library only) |
+| Python 3 | Entire toolkit |
+| Flask | Version 2 local web server and routes |
+| HTML / CSS / JavaScript | Version 2 homepage (no security algorithms in JS) |
 | Git / GitHub | Version control and publication |
 | JSON | Integrity baselines (`data/monitored_files.json`) |
 | Regular expressions | IPv4 extraction in the Log Analyzer |
 | HTTPS / JSON APIs | Public IP lookup via [ipwho.is](https://ipwho.is/) |
 | SHA-256 / SHA-512 / MD5 | Hashing and integrity |
-| Terminal CLI | Main menu and each module |
+| Terminal CLI | Version 1 main menu and each module |
 
-No `pip` packages are required.
+Version 1 uses the Python standard library only. Version 2 also needs Flask (`requirements.txt`).
 
 ## Project structure
 
 ```text
 CyberToolkit/
-├── src/
-│   ├── cybertool.py              # Main menu (start here)
-│   ├── password_analyzer.py      # Part 1
-│   ├── hash_calculator.py        # Part 2
-│   ├── integrity_checker.py      # Part 3
-│   ├── ip_information.py         # Part 4
-│   └── log_analyzer.py           # Part 5
-├── data/                         # Local integrity DB and optional IP reports
+├── app/                          # Version 2 Flask application
+│   ├── __init__.py
+│   ├── routes.py
+│   ├── modules/                  # Thin wrappers around src/ (logic not rewritten)
+│   ├── templates/
+│   │   └── index.html
+│   └── static/
+│       ├── css/style.css
+│       └── js/app.js
+├── src/                          # Version 1 CLI and cybersecurity modules
+│   ├── cybertool.py
+│   ├── password_analyzer.py
+│   ├── hash_calculator.py
+│   ├── integrity_checker.py
+│   ├── ip_information.py
+│   └── log_analyzer.py
+├── data/
 ├── logs/
-│   └── sample.log                # Example log for the analyzer
-├── reports/                      # Optional log analysis reports
-├── tests/                        # Unit tests
-├── docs/                         # Extra notes (optional)
+│   └── sample.log
+├── reports/
+├── tests/
+├── docs/
+├── run.py                        # Start the Version 2 web app
+├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
 
 | Path | Role |
 | --- | --- |
-| `src/` | Application code. `cybertool.py` imports the other modules. |
+| `src/` | Version 1. `cybertool.py` and the security modules. **Do not delete.** |
+| `app/` | Version 2 Flask app. Dashboard UI in Part 2; tool APIs later. |
+| `app/modules/` | Imports V1 functions so the web app can call them later. |
 | `data/` | Created/updated at runtime (integrity JSON, IP reports). Not for secrets. |
 | `logs/` | Sample log plus any logs you choose to analyze. |
 | `reports/` | Written only if you save a log report. |
-| `tests/` | Automated tests for hashing, integrity, IP, logs, and the menu. |
+| `tests/` | Automated tests for V1 tools and the V2 homepage. |
 | `docs/` | Placeholder for extra documentation. |
 
 ## Installation
@@ -78,11 +96,21 @@ git clone https://github.com/AljaziAlmujaddam/CyberToolkit.git
 cd CyberToolkit
 ```
 
-There is nothing to install with pip. Use the Python that shipped with macOS or your own Python 3.
+**Version 1 (CLI)** needs no pip packages.
+
+**Version 2 (web)** uses a virtual environment and Flask:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+The `.venv/` folder is gitignored and should not be uploaded to GitHub.
 
 ## Usage
 
-From the project folder:
+### Version 1 — terminal
 
 ```bash
 python3 src/cybertool.py
@@ -107,11 +135,26 @@ Enter `1`–`5` to open a tool. Use **Back** inside a tool, then Enter, to retur
 
 You can still run a module directly while learning, for example `python3 src/hash_calculator.py`.
 
+### Version 2 — local web dashboard (Part 2)
+
+The homepage is a full dashboard: header, Home / Tools / About navigation, a hero section, five tool cards, and an About section. **Open Tool** shows a workspace message only. Analysis still happens in Version 1 Python modules in a later part — not in JavaScript.
+
+```bash
+source .venv/bin/activate
+python3 run.py
+```
+
+Then open [http://127.0.0.1:5000/](http://127.0.0.1:5000/) on the same computer. The server binds to localhost only.
+
+```text
+Browser  →  Flask (GET /)  →  dashboard HTML + CSS + JS  →  Browser
+```
+
 ## Modules
 
 ### Password Analyzer
 
-Asks for a password with hidden input (`getpass`). Prints the character count. Nothing is saved, logged, or uploaded.
+Asks for a password with hidden input (`getpass`). Reports length, whether it contains uppercase, lowercase, digits, and special characters, then a simple strength label (Very Weak / Weak / Medium / Strong) with short suggestions. The password is never printed, saved, logged, or uploaded. This is an educational checker — it does not look up leaked passwords.
 
 ### Hash Calculator
 
@@ -154,29 +197,41 @@ Try `logs/sample.log`. Keyword search is case-insensitive. Save Report writes `r
 - Simple log rules produce **false positives**.
 - **Do not use MD5** for password storage or security-critical integrity.
 - Do not commit API keys, tokens, or `.env` files.
+- Run the Flask development server on **localhost** (`127.0.0.1`). Do not expose it to the internet.
+- Do not put a Flask secret key in source control; use `FLASK_SECRET_KEY` if sessions are added later.
+- The web UI must never execute shell commands or untrusted code from the browser.
+- Passwords entered into the analyzer must not be stored (V1 already follows this).
 
 This project does not scan ports, exploit hosts, or hide activity.
 
 ## Testing
 
-Automated tests (standard library `unittest`):
+Version 2 tests need Flask installed (use the virtual environment):
 
 ```bash
+source .venv/bin/activate
+python3 tests/test_web_app.py
+```
+
+```bash
+python3 tests/test_password_analyzer.py
 python3 tests/test_hash_calculator.py
 python3 tests/test_integrity_checker.py
 python3 tests/test_ip_information.py
 python3 tests/test_log_analyzer.py
 python3 tests/test_cybertool.py
+python3 tests/test_web_app.py
 ```
 
 | Area | Covered |
 | --- | --- |
-| Password Analyzer | Length helper; hidden input is manual |
+| Password Analyzer | Length, character classes, strength labels; hidden input is manual |
 | Hash Calculator | SHA-256/512, MD5 length, file hash, compare, invalid algorithm |
 | File Integrity Checker | Add, unchanged, modified, missing, multiple files, remove |
 | IP Information Tool | Valid/invalid IPs, types, mocked API errors, report save; private IPs not sent to the API |
 | Log Analyzer | Sample log, empty log, missing file, failed-login threshold, IP counts, case-insensitive search |
 | Main menu | All five tools are dispatched; `abc` and `9` rejected; Exit message |
+| Version 2 homepage | Flask starts; HTML lists tools; CSS and JS are served; V1 helpers still import |
 
 Error handling includes empty input, missing files, directories, timeouts (IP tool), and permission errors where applicable.
 
@@ -190,14 +245,15 @@ This project was built to practice:
 - IP addressing and HTTP APIs
 - Regular expressions and log analysis
 - CLI menus, input validation, and tests
+- Flask, HTML/CSS/JavaScript, and frontend/backend separation
 - Git, `.gitignore`, and GitHub
 
 ## Future improvements
 
 Not implemented yet:
 
-- Richer password scoring and classifications
-- Web UI or dashboard
+- Wire each dashboard button to Flask routes that call the V1 modules
+- Common-password / breach checks (still never store the password)
 - Real-time log monitoring and alerts
 - Signed or protected integrity baselines
 - Extra hash algorithms
