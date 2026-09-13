@@ -1,0 +1,20 @@
+2026-09-13 09:00:01 INFO Application started
+2026-09-13 09:01:12 INFO Configuration loaded
+2026-09-13 09:02:00 INFO User logged in from 10.0.0.5
+2026-09-13 09:10:14 INFO Successful login for alice from 192.168.1.15
+2026-09-13 09:20:33 WARNING Disk usage above 80 percent
+2026-09-13 09:21:02 WARN Session timeout for guest
+2026-09-13 09:30:11 ERROR Database connection retry
+2026-09-13 09:30:25 ERROR Unable to write cache file
+2026-09-13 10:15:01 WARNING Failed login from 192.168.1.20
+2026-09-13 10:16:02 WARNING Failed login from 192.168.1.20
+2026-09-13 10:17:03 WARNING Failed login from 192.168.1.20
+2026-09-13 10:18:04 WARNING Failed login from 192.168.1.20
+2026-09-13 10:19:10 INFO Login successful for bob from 192.168.1.15
+2026-09-13 10:20:00 WARNING Failed authentication from 192.168.1.15
+2026-09-13 10:21:00 WARNING Authentication failed from 10.0.0.5
+2026-09-13 10:22:12 INFO Scheduled backup completed
+2026-09-13 10:23:40 ERROR Service restart required
+2026-09-13 10:24:01 INFO User logged in from 10.0.0.5
+2026-09-13 10:25:18 WARNING Login failed from 203.0.113.50
+2026-09-13 10:26:00 INFO Heartbeat ok

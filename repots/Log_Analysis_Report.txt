@@ -1,0 +1,29 @@
+CyberToolkit — Log Analysis Report
+
+File: /Users/aljazi/Desktop/CyberToolkit-1/logs/sample.log
+
+Statistics
+----------
+Total Log Entries: 20
+
+INFO Events: 8
+WARNING Events: 9
+ERROR Events: 3
+
+Failed Login Attempts: 7
+Successful Logins: 4
+
+IP Activity
+-----------
+192.168.1.20 → 4 events
+10.0.0.5 → 3 events
+192.168.1.15 → 3 events
+203.0.113.50 → 1 events
+
+Suspicious IPs
+--------------
+Potentially Suspicious Activity
+This is not confirmation that an attack occurred.
+
+IP Address: 192.168.1.20
+Failed Attempts: 4
