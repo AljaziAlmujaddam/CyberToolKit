@@ -54,8 +54,8 @@
         <div class="section-heading">
           <h2>Security Tools</h2>
           <p>
-            Open a tool to see its workspace. The dashboard talks to Flask over
-            HTTP. Full tool forms will use that same API in a later part.
+            Open a tool workspace. All five Version 1 tools talk to Flask from
+            this dashboard.
           </p>
         </div>
 
@@ -133,10 +133,188 @@
           id="tool-panel"
           class="tool-panel"
           hidden
-          aria-live="polite"
         >
           <h3 id="tool-panel-title">Tool</h3>
-          <p id="tool-panel-body"></p>
+          <p id="tool-panel-intro"></p>
+
+          <form id="password-form" class="tool-form" hidden>
+            <label for="password-input">Password</label>
+            <input
+              id="password-input"
+              name="toolkit-password"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="1024"
+              placeholder="Enter password"
+            />
+            <p class="field-hint">
+              Analyzed locally. The password is not stored, logged, or shown in
+              the result.
+            </p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                Analyze Password
+              </button>
+            </div>
+          </form>
+          <p id="password-error" class="form-error" hidden role="alert"></p>
+          <div id="password-result" class="result-card" hidden>
+            <p class="result-kicker">Password Strength</p>
+            <p id="password-strength" class="strength-label"></p>
+            <p id="password-length" class="result-meta"></p>
+            <ul class="checklist">
+              <li id="check-length">Length</li>
+              <li id="check-uppercase">Uppercase</li>
+              <li id="check-lowercase">Lowercase</li>
+              <li id="check-digit">Number</li>
+              <li id="check-special">Special character</li>
+            </ul>
+            <p class="result-kicker">Recommendations</p>
+            <ul id="password-suggestions" class="suggestion-list"></ul>
+          </div>
+
+          <form id="hash-form" class="tool-form" hidden>
+            <label for="hash-text">Text</label>
+            <textarea
+              id="hash-text"
+              name="hash-text"
+              rows="4"
+              maxlength="32768"
+              placeholder="Enter text"
+            ></textarea>
+            <label for="hash-algorithm">Algorithm</label>
+            <select id="hash-algorithm" name="hash-algorithm">
+              <option value="sha256" selected>SHA-256</option>
+              <option value="sha512">SHA-512</option>
+              <option value="md5">MD5</option>
+            </select>
+            <p id="md5-warning" class="md5-warning" hidden>
+              MD5 is provided for educational comparison and should not be used
+              for modern security purposes.
+            </p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Calculate</button>
+            </div>
+          </form>
+          <p id="hash-error" class="form-error" hidden role="alert"></p>
+          <div id="hash-result" class="result-card" hidden>
+            <p class="result-kicker">Algorithm</p>
+            <p id="hash-algorithm-result"></p>
+            <p class="result-kicker">Hash</p>
+            <code id="hash-value" class="hash-output"></code>
+            <p id="hash-warning" class="md5-warning" hidden></p>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="copy-hash">
+                Copy hash
+              </button>
+            </div>
+          </div>
+
+          <form id="integrity-form" class="tool-form" hidden>
+            <label for="integrity-file">Select a file</label>
+            <input id="integrity-file" name="integrity-file" type="file" />
+            <p class="field-hint">
+              Uploads stay in a controlled folder. Only the SHA-256 reference is
+              stored in JSON — not file contents. Paths outside that folder are
+              rejected.
+            </p>
+            <label for="integrity-file-list">Registered files</label>
+            <select id="integrity-file-list" name="integrity-file-list">
+              <option value="">None registered yet</option>
+            </select>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" id="integrity-register">
+                Register File
+              </button>
+              <button type="button" class="btn btn-secondary" id="integrity-check">
+                Check Integrity
+              </button>
+              <button type="button" class="btn btn-secondary" id="integrity-check-all">
+                Check All Files
+              </button>
+            </div>
+          </form>
+          <p id="integrity-error" class="form-error" hidden role="alert"></p>
+          <div id="integrity-result" class="result-card" hidden>
+            <p class="result-kicker">Integrity Status</p>
+            <p id="integrity-status" class="strength-label"></p>
+            <p id="integrity-meta" class="result-meta"></p>
+            <code id="integrity-hash" class="hash-output"></code>
+            <ul id="integrity-scan" class="suggestion-list"></ul>
+          </div>
+
+          <form id="ip-form" class="tool-form" hidden>
+            <label for="ip-input">IP Address</label>
+            <input
+              id="ip-input"
+              name="ip-input"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="8.8.8.8"
+            />
+            <p class="field-hint">
+              Public IPs are looked up over HTTPS at ipwho.is. Private,
+              loopback, and reserved addresses stay local. Do not put API keys
+              in this page.
+            </p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Analyze IP</button>
+            </div>
+          </form>
+          <p id="ip-error" class="form-error" hidden role="alert"></p>
+          <div id="ip-result" class="result-card" hidden>
+            <p class="result-kicker">IP Information</p>
+            <ul id="ip-fields" class="suggestion-list"></ul>
+            <p id="ip-note" class="field-hint"></p>
+          </div>
+
+          <form id="log-form" class="tool-form" hidden>
+            <label for="log-file">Select log file</label>
+            <input id="log-file" name="log-file" type="file" />
+            <p class="field-hint">
+              Analysis runs locally in Python. Logs are not sent to an external
+              service. Uploads are size-limited and must stay inside the allowed
+              logs folder if you pick a server file.
+            </p>
+            <label for="log-file-list">Or use a log from logs/</label>
+            <select id="log-file-list" name="log-file-list">
+              <option value="">Choose a server log</option>
+            </select>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" id="log-analyze">
+                Analyze Log
+              </button>
+            </div>
+            <label for="log-keyword">Search logs</label>
+            <input
+              id="log-keyword"
+              name="log-keyword"
+              type="text"
+              autocomplete="off"
+              placeholder="failed"
+            />
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="log-search">
+                Search
+              </button>
+            </div>
+          </form>
+          <p id="log-error" class="form-error" hidden role="alert"></p>
+          <div id="log-result" class="result-card" hidden>
+            <p class="result-kicker">Log Analysis Results</p>
+            <ul id="log-stats" class="suggestion-list"></ul>
+            <p class="result-kicker">Security Events</p>
+            <ul id="log-security" class="suggestion-list"></ul>
+            <p class="result-kicker">IP Activity</p>
+            <ul id="log-ips" class="suggestion-list"></ul>
+            <p class="result-kicker">Search Matches</p>
+            <ul id="log-matches" class="suggestion-list"></ul>
+            <p id="log-note" class="field-hint"></p>
+          </div>
+
+          <p id="tool-panel-body" class="tool-preview" hidden></p>
           <button type="button" class="btn btn-primary" id="close-tool">
             Back to tools
           </button>
@@ -151,16 +329,15 @@
           <article>
             <h3>Frontend</h3>
             <p>
-              HTML, CSS, and JavaScript build this dashboard: layout, styling,
-              and navigation. They do not score passwords or hash files.
+              HTML, CSS, and JavaScript build this dashboard and send requests.
+              They do not score passwords or compute hashes.
             </p>
           </article>
           <article>
             <h3>Backend</h3>
             <p>
-              Flask serves this page and JSON APIs such as
-              <code>/api/status</code>. Version 1 Python modules stay separate
-              and are called from routes, not from the browser.
+              Flask APIs call Version 1 Python modules. All five tools are live
+              on this dashboard.
             </p>
           </article>
           <article>

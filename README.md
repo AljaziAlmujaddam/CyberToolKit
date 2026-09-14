@@ -135,9 +135,9 @@ Enter `1`–`5` to open a tool. Use **Back** inside a tool, then Enter, to retur
 
 You can still run a module directly while learning, for example `python3 src/hash_calculator.py`.
 
-### Version 2 — local web dashboard (Part 3)
+### Version 2 — local web dashboard (Part 6)
 
-The homepage is a full dashboard: header, Home / Tools / About navigation, a hero section, five tool cards, and an About section. JavaScript uses `fetch()` to call Flask. **Open Tool** still shows a workspace message; the remaining tool forms come later.
+The homepage is a full dashboard. All five Version 1 tools work through Flask: **Password Analyzer**, **Hash Calculator** (text hashing), **File Integrity Checker**, **IP Information**, and **Log Analyzer**.
 
 ```bash
 source .venv/bin/activate
@@ -146,23 +146,26 @@ python3 run.py
 
 Then open [http://127.0.0.1:5000/](http://127.0.0.1:5000/) on the same computer. The server binds to localhost only.
 
-Check the API in the browser or with curl:
-
-```bash
-curl http://127.0.0.1:5000/api/status
-```
-
 ```text
-Browser  →  HTML / CSS / JS  →  HTTP  →  Flask  →  Python modules  →  JSON  →  Dashboard
+Browser  →  HTML / CSS / JS  →  HTTP  →  Flask  →  V1 Python modules  →  JSON  →  Dashboard
 ```
 
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET | `/` | Dashboard |
-| GET | `/api/status` | JSON health check (`status`, `application`) |
-| POST | `/api/password/analyze` | JSON `{"password": "..."}` → Version 1 analysis (password is not stored or echoed) |
+| GET | `/api/status` | JSON health check |
+| POST | `/api/password/analyze` | Password analysis (not stored or echoed) |
+| POST | `/api/hash/calculate` | Text hash (`sha256`, `sha512`, or educational `md5`) |
+| POST | `/api/integrity/register` | Upload a file into `data/monitored/` and store its SHA-256 |
+| POST | `/api/integrity/check` | Compare a file in that folder with its stored hash |
+| GET | `/api/integrity/files` | List registered names (no absolute server paths) |
+| POST | `/api/integrity/check-all` | Check every registered file in the allowed folder |
+| POST | `/api/ip/analyze` | Validate/classify an IP; public IPs may be looked up at ipwho.is |
+| GET | `/api/log/files` | List files in `logs/` |
+| POST | `/api/log/analyze` | Analyze an upload or a file from `logs/` (local only) |
+| POST | `/api/log/search` | Case-insensitive keyword search of the same authorized log |
 
-Invalid API paths return JSON `404`. Wrong methods return JSON `405`. Missing or invalid JSON on POST returns JSON `400`. Hash, integrity, IP, and log APIs are not wired yet.
+Web integrity and log tools never accept arbitrary paths such as `/etc/passwd` or `../`. Uploaded logs are size-limited, scanned as text, analyzed locally, and not kept after the request. Optional `IPWHO_API_KEY` is read from the environment only. Private, loopback, and reserved IPs are not sent to the external API. Repeated failed logins are labeled *potentially suspicious*, not as proof of an attack.
 
 ## Modules
 
@@ -245,7 +248,7 @@ python3 tests/test_web_app.py
 | IP Information Tool | Valid/invalid IPs, types, mocked API errors, report save; private IPs not sent to the API |
 | Log Analyzer | Sample log, empty log, missing file, failed-login threshold, IP counts, case-insensitive search |
 | Main menu | All five tools are dispatched; `abc` and `9` rejected; Exit message |
-| Version 2 homepage and API | Flask starts; HTML lists tools; CSS and JS are served; `/api/status` JSON; password POST validation; V1 helpers still import |
+| Version 2 homepage and API | All five tools; path traversal rejected; private IPs not sent to the API; logs analyzed locally; V1 helpers still import |
 
 Error handling includes empty input, missing files, directories, timeouts (IP tool), and permission errors where applicable.
 
@@ -266,7 +269,7 @@ This project was built to practice:
 
 Not implemented yet:
 
-- Wire each remaining dashboard button to Flask routes that call the V1 modules (hash, integrity, IP, log)
+- File hashing and hash comparison in the web Hash Calculator
 - Common-password / breach checks (still never store the password)
 - Real-time log monitoring and alerts
 - Signed or protected integrity baselines

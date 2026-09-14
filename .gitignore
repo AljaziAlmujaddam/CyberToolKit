@@ -18,6 +18,8 @@ instance/
 
 # Local runtime data (generated while using the tools)
 data/monitored_files.json
+data/monitored/*
+!data/monitored/.gitkeep
 data/IP_Report_*.txt
 reports/Log_Analysis_Report.txt
 logs/empty.log
